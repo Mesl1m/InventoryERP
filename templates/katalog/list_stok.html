@@ -1,0 +1,580 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Daftar Stok{% endblock %}
+{% block page_title %}Daftar Stok {% endblock %}
+
+{% block content %}
+
+<!-- Modal for Adding Stok Masuk -->
+<div class="modal fade" id="tambahStokMasukModal" tabindex="-1" aria-labelledby="tambahStokMasukModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="{% url 'tambah_stok_masuk' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tambahStokMasukModalLabel"><i class="fas fa-plus"></i> Tambah Stok Masuk</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="{{ formStokMasuk.produk.id_for_label }}" class="form-label">{{ formStokMasuk.produk.label }}</label>
+                        {{ formStokMasuk.produk }}
+                        {% if formStokMasuk.produk.errors %}
+                            <div class="text-danger">{{ formStokMasuk.produk.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ formStokMasuk.jumlah.id_for_label }}" class="form-label">{{ formStokMasuk.jumlah.label }}</label>
+                        {{ formStokMasuk.jumlah }}
+                        {% if formStokMasuk.jumlah.errors %}
+                            <div class="text-danger">{{ formStokMasuk.jumlah.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ formStokMasuk.supplier.id_for_label }}" class="form-label">{{ formStokMasuk.supplier.label }}</label>
+                        {{ formStokMasuk.supplier }}
+                        {% if formStokMasuk.supplier.errors %}
+                            <div class="text-danger">{{ formStokMasuk.supplier.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ formStokMasuk.keterangan.id_for_label }}" class="form-label">{{ formStokMasuk.keterangan.label }}</label>
+                        {{ formStokMasuk.keterangan }}
+                        {% if formStokMasuk.keterangan.errors %}
+                            <div class="text-danger">{{ formStokMasuk.keterangan.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Modal Edit Stok Masuk -->
+<div class="modal fade" id="editStokMasukModal" tabindex="-1" aria-labelledby="editStokMasukModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formEditStokMasuk" method="post">
+                {% csrf_token %}
+                <input type="hidden" id="edit_stok_masuk_id" name="stok_masuk_id">
+                
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title" id="editStokMasukModalLabel">
+                        <i class="fas fa-edit"></i> Edit Stok Masuk
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_produk" class="form-label">Produk</label>
+                        <select class="form-control" id="edit_produk" name="produk" required>
+                            <!-- Opsi produk akan diisi dengan JavaScript -->
+                        </select>
+                        <div class="invalid-feedback" id="error_produk"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_jumlah" class="form-label">Jumlah Stok Masuk</label>
+                        <input type="number" class="form-control" id="edit_jumlah" name="jumlah" required>
+                        <div class="invalid-feedback" id="error_jumlah"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_supplier" class="form-label">Supplier</label>
+                        <select class="form-control" id="edit_supplier" name="supplier" required>
+                            <!-- Opsi supplier akan diisi dengan JavaScript -->
+                        </select>
+                        <div class="invalid-feedback" id="error_supplier"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_keterangan" class="form-label">Keterangan</label>
+                        <textarea class="form-control" id="edit_keterangan" name="keterangan" rows="3"></textarea>
+                        <div class="invalid-feedback" id="error_keterangan"></div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Batal
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save"></i> Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Modal for Adding Stok Keluar -->
+<div class="modal fade" id="tambahStokKeluarModal" tabindex="-1" aria-labelledby="tambahStokKeluarModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="{% url 'tambah_stok_keluar' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tambahStokKeluarModalLabel"><i class="fas fa-plus"></i> Tambah Stok Keluar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="{{ formStokKeluar.produk.id_for_label }}" class="form-label">{{ formStokKeluar.produk.label }}</label>
+                        {{ formStokKeluar.produk }}
+                        {% if formStokKeluar.produk.errors %}
+                            <div class="text-danger">{{ formStokKeluar.produk.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ formStokKeluar.jumlah.id_for_label }}" class="form-label">{{ formStokKeluar.jumlah.label }}</label>
+                        {{ formStokKeluar.jumlah }}
+                        {% if formStokKeluar.jumlah.errors %}
+                            <div class="text-danger">{{ formStokKeluar.jumlah.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ formStokKeluar.alasan.id_for_label }}" class="form-label">{{ formStokKeluar.alasan.label }}</label>
+                        {{ formStokKeluar.alasan }}
+                        {% if formStokKeluar.alasan.errors %}
+                            <div class="text-danger">{{ formStokKeluar.alasan.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ formStokKeluar.keterangan.id_for_label }}" class="form-label">{{ formStokKeluar.keterangan.label }}</label>
+                        {{ formStokKeluar.keterangan }}
+                        {% if formStokKeluar.keterangan.errors %}
+                            <div class="text-danger">{{ formStokKeluar.keterangan.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Modal Edit Stok Keluar -->
+<div class="modal fade" id="editStokKeluarModal" tabindex="-1" aria-labelledby="editStokKeluarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formEditStokKeluar" method="post">
+                {% csrf_token %}
+                <input type="hidden" id="edit_stok_keluar_id" name="stok_keluar_id">
+                
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title" id="editStokKeluarModalLabel">
+                        <i class="fas fa-edit"></i> Edit Stok Keluar
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_produk" class="form-label">Produk</label>
+                        <select class="form-control" id="edit_produk" name="produk" required>
+                            <!-- Opsi produk akan diisi dengan JavaScript -->
+                        </select>
+                        <div class="invalid-feedback" id="error_produk"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_jumlah" class="form-label">Jumlah Stok Keluar</label>
+                        <input type="number" class="form-control" id="edit_jumlah" name="jumlah" required>
+                        <div class="invalid-feedback" id="error_jumlah"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_alasan" class="form-label">Alasan</label>
+                        <input type="text" class="form-control" id="edit_alasan" name="alasan" required>
+                        <div class="invalid-feedback" id="error_alasan"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_keterangan" class="form-label">Keterangan</label>
+                        <textarea class="form-control" id="edit_keterangan" name="keterangan" rows="3"></textarea>
+                        <div class="invalid-feedback" id="error_keterangan"></div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Batal
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save"></i> Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: rgb(134, 131, 131); background-image: linear-gradient(180deg, rgb(215, 207, 54) 0%,  100%);">
+        <h5 class="mb-0"><i class="fas fa-truck-loading"></i> Data Stok Masuk</h5>
+    </div>
+    <div class="card-body">
+        <!-- Button trigger modal -->
+        <div class="mb-3">
+            <button type="button" class="btn" style="background-color:rgb(134, 131, 131); color: white;" data-bs-toggle="modal" data-bs-target="#tambahStokMasukModal">
+                <i class="fas fa-plus"></i> Tambah Stok Masuk
+            </button>
+        </div>
+
+        <!-- Table Supplier -->
+        <div class="table-responsive">
+            <table id="produkTableMasuk" class="table table-hover table-bordered mb-0">
+                <thead style="background-color: rgb(134, 131, 131);" class="text-center">
+                    <tr>
+                        <th>produk</th>
+                        <th>jumlah</th>
+                        <th>tanggal</th>
+                        <th>supplier</th>
+                        <th>keterangan</th>
+                        <th style="width: 120px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sml in stok_masuk %}
+                    <tr>
+                        <td>{{ sml.produk.nama }}</td>
+                        <td>{{ sml.jumlah }}</td>
+                        <td>{{ sml.tanggal }}</td>
+                        <td>{{ sml.supplier }}</td>
+                        <td>{{ sml.keterangan }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-warning edit-stok-masuk-btn" data-id="{{ sml.id }}"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger delete-btn" data-id="{{ sml.id }}"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: rgb(189, 131, 131); background-image: linear-gradient(180deg, rgb(215, 207, 54) 0%,  100%);">
+        <h5 class="mb-0"><i class="fas fa-truck-loading"></i> Data Stok Keluar</h5>
+    </div>
+    <div class="card-body">
+        <!-- Button trigger modal -->
+        <div class="mb-3">
+            <button type="button" class="btn" style="background-color:rgb(189, 131, 131); color: white;" data-bs-toggle="modal" data-bs-target="#tambahStokKeluarModal">
+                <i class="fas fa-plus"></i> Tambah Stok Keluar
+            </button>
+        </div>
+
+        <!-- Table Supplier -->
+        <div class="table-responsive">
+            <table id="produkTableKeluar" class="table table-hover table-bordered mb-0">
+                <thead style="background-color: rgb(189, 131, 131);" class="text-center">
+                    <tr>
+                        <th>produk</th>
+                        <th>jumlah</th>
+                        <th>tanggal</th>
+                        <th>supplier</th>
+                        <th>keterangan</th>
+                        <th style="width: 120px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for smk in stok_keluar %}
+                    <tr>
+                        <td>{{ smk.produk.nama }}</td>
+                        <td>{{ smk.jumlah }}</td>
+                        <td>{{ smk.tanggal }}</td>
+                        <td>{{ smk.alasan }}</td>
+                        <td>{{ smk.keterangan }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-warning edit-stok-keluar-btn" data-id="{{ smk.id }}"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger delete-stokKeluar-btn" data-id="{{ smk.id }}"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/stok.js' %}"></script>
+<script>
+  $(document).ready(function () {
+    $('#produkTableKeluar').DataTable({
+      layout: {
+        topStart: {
+            buttons: ['excel', 'pdf']
+        }
+    },
+    language: {
+        emptyTable: 'Belum ada data produk'
+    },
+    lengthChange: false
+    });
+  });
+
+    $('#produkTableMasuk').DataTable({
+      layout: {
+        topStart: {
+            buttons: ['excel', 'pdf']
+        }
+    },
+    language: {
+        emptyTable: 'Belum ada data produk'
+    },
+    lengthChange: false
+    });
+
+</script>
+<script>
+    $(document).ready(function() {
+        // Handler untuk tombol edit stok masuk
+        $('.edit-stok-masuk-btn').click(function() {
+            var stokMasukId = $(this).data('id');
+            
+            // AJAX untuk mengambil data stok masuk
+            $.ajax({    
+                url: '/stok/edit-stok-masuk/' + stokMasukId + '/',  // Sesuaikan URL
+                method: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    // Isi form dengan data stok masuk
+                    $('#edit_stok_masuk_id').val(stokMasukId);
+                    $('#edit_produk').val(data.produk);        // Mengisi ID produk
+                    $('#edit_jumlah').val(data.jumlah);
+                    $('#edit_supplier').val(data.supplier);    // Mengisi ID supplier
+                    $('#edit_keterangan').val(data.keterangan);
+                    
+                    // Reset error messages
+                    $('.invalid-feedback').text('');
+                    $('.form-control').removeClass('is-invalid');
+                    
+                    // Tampilkan modal
+                    $('#editStokMasukModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
+                    alert('Gagal memuat data stok masuk');
+                }
+            });
+        });
+
+        // Handler untuk submit form edit stok masuk
+        $('#formEditStokMasuk').submit(function(e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+            var stokMasukId = $('#edit_stok_masuk_id').val();
+            
+            $.ajax({
+                url: '/stok/edit-stok-masuk/' + stokMasukId + '/',  // Sesuaikan URL
+                method: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Tutup modal dan refresh halaman
+                        $('#editStokMasukModal').modal('hide');
+                        window.location.reload();
+                    } else {
+                        // Tampilkan error messages
+                        $.each(response.errors, function(field, messages) {
+                            $('#edit_' + field).addClass('is-invalid');
+                            $('#error_' + field).text(messages.join(', '));
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
+                    alert('Terjadi kesalahan saat menyimpan perubahan');
+                }
+            });
+        });
+        $('.delete-btn').on('click', function () {
+            const keluarID = $(this).data('id');
+            const deleteUrl = `/stok/hapus/${keluarID}/`; // Sesuaikan URL ini dengan view hapus Anda
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Anda tidak dapat mengembalikan ini!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send AJAX request to delete the satuan
+                    $.ajax({
+                        url: deleteUrl,
+                        type: 'POST',
+                        data: {
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'  // Include CSRF token
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire(
+                                    'Dihapus!',
+                                    'Satuan telah dihapus.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload(); // Reload the page to see changes
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Gagal!',
+                                    response.message,  // Tampilkan pesan kesalahan jika ada
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function () {
+                            Swal.fire(
+                                'Gagal!',
+                                'Terjadi kesalahan saat menghapus satuan.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        // Handler untuk tombol edit stok keluar
+        $('.edit-stok-keluar-btn').click(function() {
+            var stokKeluarId = $(this).data('id');
+            
+            // AJAX untuk mengambil data stok keluar
+            $.ajax({    
+                url: '/stok/edit-stok-keluar/' + stokKeluarId + '/',  // Sesuaikan URL
+                method: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    // Isi form dengan data stok keluar
+                    $('#edit_stok_keluar_id').val(stokKeluarId);
+                    $('#edit_produk').val(data.produk);        // Mengisi ID produk
+                    $('#edit_jumlah').val(data.jumlah);
+                    $('#edit_alasan').val(data.alasan);
+                    $('#edit_keterangan').val(data.keterangan);
+                    
+                    // Reset error messages
+                    $('.invalid-feedback').text('');
+                    $('.form-control').removeClass('is-invalid');
+                    
+                    // Tampilkan modal
+                    $('#editStokKeluarModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
+                    alert('Gagal memuat data stok keluar');
+                }
+            });
+        });
+
+        // Handler untuk submit form edit stok keluar
+        $('#formEditStokKeluar').submit(function(e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+            var stokKeluarId = $('#edit_stok_keluar_id').val();
+            
+            $.ajax({
+                url: '/stok/edit-stok-keluar/' + stokKeluarId + '/',  // Sesuaikan URL
+                method: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Tutup modal dan refresh halaman
+                        $('#editStokKeluarModal').modal('hide');
+                        window.location.reload();
+                    } else {
+                        // Tampilkan error messages
+                        $.each(response.errors, function(field, messages) {
+                            $('#edit_' + field).addClass('is-invalid');
+                            $('#error_' + field).text(messages.join(', '));
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
+                    alert('Terjadi kesalahan saat menyimpan perubahan');
+                }
+            });
+        });
+        $('.delete-stokKeluar-btn').on('click', function () {
+            const keluarID = $(this).data('id');
+            const deleteUrl = `/stok/hapus-stok-keluar/${keluarID}/`; // Sesuaikan URL ini dengan view hapus Anda
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Anda tidak dapat mengembalikan ini!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send AJAX request to delete the satuan
+                    $.ajax({
+                        url: deleteUrl,
+                        type: 'POST',
+                        data: {
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'  // Include CSRF token
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire(
+                                    'Dihapus!',
+                                    'Satuan telah dihapus.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload(); // Reload the page to see changes
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Gagal!',
+                                    response.message,  // Tampilkan pesan kesalahan jika ada
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function () {
+                            Swal.fire(
+                                'Gagal!',
+                                'Terjadi kesalahan saat menghapus satuan.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

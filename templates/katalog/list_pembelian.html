@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Daftar Pembelian{% endblock %}
+{% block page_title %}Daftar Pembelian{% endblock %}
+
+{% block content %}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: rgb(235, 125, 125); background-image: linear-gradient(180deg, rgb(215, 207, 54) 0%,  100%);">
+        <h5 class="mb-0"><i class="fas fa-shopping-cart"></i> Data Pembelian</h5>
+    </div>
+    <div class="card-body">
+        <!-- Button trigger modal -->
+        <div class="mb-3">
+            <button type="button" class="btn" style="background-color:rgb(235, 125, 125); color: white;" data-bs-toggle="modal" data-bs-target="#tambahPembelianModal">
+                <i class="fas fa-plus"></i> Tambah Pembelian
+            </button>
+        </div>
+
+        <!-- Table Pembelian -->
+        <div class="table-responsive">
+            <table id="produkTablePembelian" class="table table-hover table-bordered mb-0">
+                <thead style="background-color: rgba(235, 125, 125);" class="text-center">
+                    <tr>
+                        <th>Supplier</th>
+                        <th>Tanggal</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Keterangan</th>
+                        <th style="width: 120px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pembelian in pembelian %}
+                    <tr>
+                        <td>{{ pembelian.supplier }}</td>
+                        <td>{{ pembelian.tanggal }}</td>
+                        <td>{{ pembelian.total }}</td>
+                        <td>{{ pembelian.status }}</td>
+                        <td>{{ pembelian.keterangan }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-warning edit-btn" data-id="{{ pembelian.id }}"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger delete-btn" data-id="{{ pembelian.id }}"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: rgb(235, 125, 125); background-image: linear-gradient(180deg, rgb(215, 207, 54) 0%,  100%);">
+        <h5 class="mb-0"><i class="fas fa-list"></i> Data Detail Pembelian</h5>
+    </div>
+    <div class="card-body">
+        <!-- Button trigger modal -->
+        <div class="mb-3">
+            <button type="button" class="btn" style="background-color:rgb(235, 125, 125); color: white;" data-bs-toggle="modal" data-bs-target="#tambahDetailPembelianModal">
+                <i class="fas fa-plus"></i> Tambah Detail Pembelian
+            </button>
+        </div>
+
+        <!-- Table Detail Pembelian -->
+        <div class="table-responsive">
+            <table id="produkTableDetailPembelian" class="table table-hover table-bordered mb-0">
+                <thead style="background-color: rgba(235, 125, 125);" class="text-center">
+                    <tr>
+                        <th>Pembelian</th>
+                        <th>Produk</th>
+                        <th>Qty</th>
+                        <th>Harga Beli</th>
+                        <th>Subtotal</th>
+                        <th style="width: 120px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dp in detail_pembelian %}
+                    <tr>
+                        <td>{{ dp.pembelian }}</td>
+                        <td>{{ dp.produk }}</td>
+                        <td>{{ dp.qty }}</td>
+                        <td>{{ dp.harga_beli }}</td>
+                        <td>{{ dp.subtotal }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-warning edit-detail-btn" data-id="{{ dp.id }}"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger delete-detail-btn" data-id="{{ dp.id }}"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Pembelian -->
+<div class="modal fade" id="tambahPembelianModal" tabindex="-1" aria-labelledby="tambahPembelianModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="{% url 'tambah_pembelian' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tambahPembelianModalLabel"><i class="fas fa-shopping-cart"></i> Tambah Pembelian</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form fields for Pembelian -->
+                    <div class="mb-3">
+                        <label for="supplier" class="form-label">Supplier</label>
+                        <select class="form-select" id="supplier" name="supplier" required>
+                            <!-- Populate suppliers here -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="total" class="form-label">Total</label>
+                        <input type="number" class="form-control" id="total" name="total" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <input type="text" class="form-control" id="status" name="status" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="keterangan" class="form-label">Keterangan</label>
+                        <textarea class="form-control" id="keterangan" name="keterangan" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Detail Pembelian -->
+<div class="modal fade" id="tambahDetailPembelianModal" tabindex="-1" aria-labelledby="tambahDetailPembelianModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="{% url 'tambah_detail_pembelian' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tambahDetailPembelianModalLabel"><i class="fas fa-list"></i> Tambah Detail Pembelian</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form fields for Detail Pembelian -->
+                    <div class="mb-3">
+                        <label for="pembelian" class="form-label">Pembelian</label>
+                        <select class="form-select" id="pembelian" name="pembelian" required>
+                            <!-- Populate pembelian here -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="produk" class="form-label">Produk</label>
+                        <select class="form-select" id="produk" name="produk" required>
+                            <!-- Populate produk here -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="qty" class="form-label">Qty</label>
+                        <input type="number" class="form-control" id="qty" name="qty" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="harga_beli" class="form-label">Harga Beli</label>
+                        <input type="number" class="form-control" id="harga_beli" name="harga_beli" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subtotal" class="form-label">Subtotal</label>
+                        <input type="number" class="form-control" id="subtotal" name="subtotal" readonly>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pembelian.js' %}"></script>
+<script>
+    // JavaScript untuk mengisi subtotal dan mengatur event handler untuk edit dan delete
+    $(document).ready(function() {
+        // Contoh untuk menghitung subtotal
+        $('#qty, #harga_beli').on('input', function() {
+            var qty = parseFloat($('#qty').val()) || 0;
+            var hargaBeli = parseFloat($('#harga_beli').val()) || 0;
+            $('#subtotal').val(qty * hargaBeli);
+        });
+
+        // Event handler untuk tombol edit dan delete
+        $('.edit-btn').click(function() {
+            var id = $(this).data('id');
+            // Lakukan AJAX untuk mendapatkan data dan mengisi modal edit
+        });
+
+        $('.delete-btn').click(function() {
+            var id = $(this).data('id');
+            // Lakukan AJAX untuk menghapus data
+        });
+
+        $('.edit-detail-btn').click(function() {
+            var id = $(this).data('id');
+            // Lakukan AJAX untuk mendapatkan data detail dan mengisi modal edit
+        });
+
+        $('.delete-detail-btn').click(function() {
+            var id = $(this).data('id');
+            // Lakukan AJAX untuk menghapus detail pembelian
+        });
+    });
+</script>
+{% endblock %}

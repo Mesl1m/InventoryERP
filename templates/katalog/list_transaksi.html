@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Daftar Transaksi{% endblock %}
+
+{% block page_title %}Daftar Transaksi{% endblock %}
+
+{% block content %}
+
+<!-- Button trigger modal -->
+<div class="mb-3">
+  <button type="button" class="btn" style="background-color:rgb(255, 76, 207); color: white;" data-bs-toggle="modal" data-bs-target="#tambahTransaksiModal">
+    <i class="fas fa-plus"></i> Tambah Transaksi
+  </button>
+</div>
+
+<!-- Modal for Adding Transaction -->
+<div class="modal fade" id="tambahTransaksiModal" tabindex="-1" aria-labelledby="tambahTransaksiModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="{% url 'tambah_transaksi' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tambahTransaksiModalLabel"><i class="fas fa-receipt"></i> Tambah Transaksi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="{{ form.pelanggan.id_for_label }}" class="form-label">{{ form.pelanggan.label }}</label>
+                        {{ form.pelanggan }}  
+                        {% if form.pelanggan.errors %}
+                            <div class="text-danger">{{ form.pelanggan.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.produk.id_for_label }}" class="form-label">{{ form.produk.label }}</label>
+                        {{ form.produk }}  
+                        {% if form.produk.errors %}
+                            <div class="text-danger">{{ form.produk.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.jumlah.id_for_label }}" class="form-label">{{ form.jumlah.label }}</label>
+                        {{ form.jumlah }}  
+                        {% if form.jumlah.errors %}
+                            <div class="text-danger">{{ form.jumlah.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.catatan.id_for_label }}" class="form-label">{{ form.catatan.label }}</label>
+                        {{ form.catatan }}  
+                        {% if form.catatan.errors %}
+                            <div class="text-danger">{{ form.catatan.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Editing Transaction -->
+<div class="modal fade" id="editTransaksiModal" tabindex="-1" aria-labelledby="editTransaksiModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" id="editTransaksiForm">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editTransaksiModalLabel"><i class="fas fa-receipt"></i> Edit Transaksi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_pelanggan" class="form-label">Pelanggan</label>
+                        <input type="text" class="form-control" id="edit_pelanggan" name="pelanggan" readonly >
+                        <div class="text-danger" id="error_edit_pelanggan"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_produk" class="form-label">Produk</label>
+                        <input type="text" class="form-control" id="edit_produk" name="produk" readonly >
+                        <div class="text-danger" id="error_edit_produk"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_jumlah" class="form-label">Jumlah</label>
+                        <input type="number" class="form-control" id="edit_jumlah" name="jumlah" required>
+                        <div class="text-danger" id="error_edit_jumlah"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_tanggal" class="form-label">Tanggal</label>
+                        <input type="date" class="form-control" id="edit_tanggal" name="tanggal" readonly >
+                        <div class="text-danger" id="error_edit_tanggal"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_catatan" class="form-label">Catatan</label>
+                        <textarea class="form-control" id="edit_catatan" name="catatan" rows="3"></textarea>
+                        <div class="text-danger" id="error_edit_catatan"></div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Table Transaksi -->
+<div class="card shadow-sm">
+  <div class="card-header bg-primary text-white mb-3" style="background-color: rgb(255, 76, 207); background-image: linear-gradient(180deg,rgb(255, 76, 207) 0%, rgb(255, 76, 207) 100%);">
+    <h5 class="mb-0"><i class="fas fa-receipt"></i> Data Transaksi</h5>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table id="transaksiTable" class="table table-bordered table-striped mb-0">
+        <thead style="background-color: rgba(255, 76, 207, 0.58);" class="text-center">
+          <tr>
+            <th>Pelanggan</th>
+            <th>Produk</th>
+            <th>Jumlah</th>
+            <th>Tanggal</th>
+            <th>Catatan</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in transaksi %}
+          <tr>
+            <td>{{ t.pelanggan.nama }}</td>
+            <td>{{ t.produk.nama }}</td>
+            <td><span class="badge bg-primary">{{ t.jumlah }}</span></td>
+            <td>{{ t.tanggal }}</td>
+            <td>{{ t.catatan|default:"-" }}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-warning edit-btn" data-id="{{ t.id }}"><i class="fas fa-edit"></i></button>
+              <button class="btn btn-sm btn-danger delete-btn" data-id="{{ t.id }}"><i class="fas fa-trash"></i></button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script src="{% static 'js/transaksi.js' %}"></script>
+<script>
+  $(document).ready(function () {
+    $('#transaksiTable').DataTable({
+      layout: {
+        topStart: {
+            buttons: ['excel', 'pdf']
+        }
+    },
+    language: {
+        emptyTable: 'Belum ada data produk'
+    },
+    lengthChange: false
+    });
+
+    // Handle Edit Button Click
+    $('.edit-btn').on('click', function () {
+        const transaksiId = $(this).data('id');
+        $.ajax({
+            url: `/transaksi/edit/${transaksiId}/`,  // Update this line to match your URL pattern
+            type: 'GET',
+            success: function (data) {
+                // Populate the modal fields with the transaction data
+                $('#edit_pelanggan').val(data.pelanggan.nama); // Assuming pelanggan has a 'nama' attribute
+                $('#edit_produk').val(data.produk.nama); // Assuming produk has a 'nama' attribute
+                $('#edit_jumlah').val(data.jumlah);
+                $('#edit_tanggal').val(data.tanggal);
+                $('#edit_catatan').val(data.catatan);
+                $('#editTransaksiForm').data('id', transaksiId); // Store id for submit
+                $('#editTransaksiModal').modal('show');
+                clearEditErrors();
+            }
+        });
+    });
+
+    // Clear validation error messages for edit form
+    function clearEditErrors() {
+        $('#error_edit_pelanggan').text('');
+        $('#error_edit_produk').text('');
+        $('#error_edit_jumlah').text('');
+        $('#error_edit_tanggal').text('');
+        $('#error_edit_catatan').text('');
+    }
+
+    // Submit the edit form via AJAX
+    $('#editTransaksiForm').on('submit', function (e) {
+        e.preventDefault();
+        clearEditErrors();
+        const transaksiId = $(this).data('id');
+        const formData = $(this).serialize();
+
+        $.ajax({
+            url: `/transaksi/edit/${transaksiId}/`,  // Update this line to match your URL pattern
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                if (response.success) {
+                    $('#editTransaksiModal').modal('hide');
+                    location.reload(); // Reload to show updated list
+                } else {
+                    // Show validation errors returned from backend
+                    if (response.errors.pelanggan) $('#error_edit_pelanggan').text(response.errors.pelanggan[0]);
+                    if (response.errors.produk) $('#error_edit_produk').text(response.errors.produk[0]);
+                    if (response.errors.jumlah) $('#error_edit_jumlah').text(response.errors.jumlah[0]);
+                    if (response.errors.tanggal) $('#error_edit_tanggal').text(response.errors.tanggal[0]);
+                    if (response.errors.catatan) $('#error_edit_catatan').text(response.errors.catatan[0]);
+                }
+            }
+        });
+    });
+
+    $('.delete-btn').on('click', function () {
+      const transaksiId = $(this).data('id');
+      const deleteUrl = `/transaksi/hapus/${transaksiId}/`;  // Correct URL for deleting a transaction
+
+      Swal.fire({
+          title: 'Apakah Anda yakin?',
+          text: "Data akan dihapus dan tidak bisa dikembalikan!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Hapus',
+          cancelButtonText: 'Batal'
+      }).then((result) => {
+          if (result.isConfirmed) {
+              $.ajax({
+                  url: deleteUrl,
+                  type: 'POST',
+                  data: {
+                      'csrfmiddlewaretoken': '{{ csrf_token }}',  // Required for POST in Django
+                  },
+                  success: function (response) {
+                      if (response.success) {
+                          Swal.fire(
+                              'Dihapus!',
+                              'Transaksi telah berhasil dihapus.',
+                              'success'
+                          ).then(() => {
+                              location.reload();
+                          });
+                      } else {
+                          Swal.fire('Error', 'Terjadi kesalahan saat menghapus transaksi.', 'error');
+                      }
+                  },
+                  error: function () {
+                      Swal.fire('Error', 'Terjadi kesalahan pada server.', 'error');
+                  }
+              });
+          }
+      });
+    });
+  });
+</script>
+
+{% endblock %}

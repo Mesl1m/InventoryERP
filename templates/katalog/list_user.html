@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Daftar User{% endblock %}
+{% block page_title %}Daftar User{% endblock %}
+
+{% block content %}
+
+<!-- Modal for Adding User -->
+<div class="modal fade" id="tambahUserModal" tabindex="-1" aria-labelledby="tambahUser ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="{% url 'tambah_user' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tambahUser ModalLabel"><i class="fas fa-user-plus"></i> Tambah User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                        {{ form.username }}  
+                        {% if form.username.errors %}
+                            <div class="text-danger">{{ form.username.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                        {{ form.email }}  
+                        {% if form.email.errors %}
+                            <div class="text-danger">{{ form.email.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.password1.id_for_label }}" class="form-label">{{ form.password1.label }}</label>
+                        {{ form.password1 }}  
+                        {% if form.password1.errors %}
+                            <div class="text-danger">{{ form.password1.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.password2.id_for_label }}" class="form-label">{{ form.password2.label }}</label>
+                        {{ form.password2 }}  
+                        {% if form.password2.errors %}
+                            <div class="text-danger">{{ form.password2.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.role.id_for_label }}" class="form-label">{{ form.role.label }}</label>
+                        {{ form.role }}  
+                        {% if form.role.errors %}
+                            <div class="text-danger">{{ form.role.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Editing User -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUser ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" id="editUser Form">
+                {% csrf_token %}
+                <input type="hidden" id="edit_user_id" name="user_id">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUser ModalLabel">
+                        <i class="fas fa-user-edit"></i> Edit User
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="edit_username" name="username" required>
+                        <div class="text-danger" id="error_username"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="edit_email" name="email" required>
+                        <div class="text-danger" id="error_email"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_role" class="form-label">Role</label>
+                        <select class="form-select" id="edit_role" name="role" required>
+                            <option value="admin">Admin</option>
+                            <option value="staff">Staff</option>
+                        </select>
+                        <div class="text-danger" id="error_role"></div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Button trigger modal -->
+<div class="mb-3">
+  <button type="button" class="btn" style="background-color:rgb(189, 131, 131); color: white;" data-bs-toggle="modal" data-bs-target="#tambahUserModal">
+    <i class="fas fa-plus"></i> Tambah User
+  </button>
+</div>
+
+<!-- Table User -->
+<div class="card shadow-sm border-0">
+  <div class="card-header text-white d-flex justify-content-between align-items-center mb-3" style="background-color: rgb(189, 131, 131); background-image: linear-gradient(180deg, rgb(215, 207, 54) 0%,  100%);">
+      <h5 class="mb-0"><i class="fas fa-users"></i> Data User</h5>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table id="userTable" class="table table-hover table-bordered mb-0">
+        <thead style="background-color: rgb(189, 131, 131);" class="text-center">
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Aktif</th>
+            <th style="width: 120px;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in user %}
+          <tr>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td>{{ user.aktif }}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-warning edit-user-btn" data-id="{{ user.id }}"><i class="fas fa-edit"></i></button>
+              <button class="btn btn-sm btn-danger delete-btn" data-id="{{ user.id }}"><i class="fas fa-trash-alt"></i></button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/user.js' %}"></script>
+<script>
+  $(document).ready(function () {
+    $('#userTable').DataTable({
+      layout: {
+        topStart: {
+            buttons: ['excel', 'pdf']
+        }
+    },
+    language: {
+        emptyTable: 'Belum ada data produk'
+    },
+    lengthChange: false
+    });
+  });
+
+</script>
+{% if form.errors %}
+    <script>
+        // Menampilkan pesan kesalahan menggunakan SweetAlert
+        Swal.fire({
+            title: 'Error!',
+            text: 'Ada kesalahan dalam pengisian form. Silakan periksa kembali.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    </script>
+{% endif %}
+<script>
+    $(document).ready(function() {
+        // Handler untuk tombol edit user
+        $('.edit-user-btn').click(function() {
+            var userId = $(this).data('id');
+            
+            // AJAX untuk mengambil data user
+            $.ajax({    
+                url: '/user/' + userId + '/edit/',  // Sesuaikan URL
+                method: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    // Isi form dengan data user
+                    $('#edit_user_id').val(userId);
+                    $('#edit_username').val(data.username);
+                    $('#edit_email').val(data.email);
+                    $('#edit_role').val(data.role); // Mengisi ID role
+                    
+                    // Reset error messages
+                    $('.invalid-feedback').text('');
+                    $('.form-control').removeClass('is-invalid');
+                    
+                    // Tampilkan modal
+                    $('#editUser Modal').modal('show'); // Pastikan ID modal sesuai
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
+                    alert('Gagal memuat data pengguna');
+                }
+            });
+        });
+        // Handler untuk submit form edit user
+        $('#editUser Form').submit(function(e) { // Pastikan ID form sesuai
+            e.preventDefault();
+            var formData = $(this).serialize();
+            var userId = $('#edit_user_id').val();
+            
+            $.ajax({
+                url: '/user/' + userId + '/edit/',  // Sesuaikan URL
+                method: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Tutup modal dan refresh halaman
+                        $('#editUser Modal').modal('hide'); // Pastikan ID modal sesuai
+                        window.location.reload();
+                    } else {
+                        // Tampilkan error messages
+                        $.each(response.errors, function(field, messages) {
+                            $('#edit_' + field).addClass('is-invalid');
+                            $('#error_' + field).text(messages.join(', '));
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
+                    alert('Terjadi kesalahan saat menyimpan perubahan');
+                }
+            });
+        });
+        $('.delete-btn').on('click', function () {
+            const userID = $(this).data('id');
+            const deleteUrl = `/user/hapus/${userID}/`; // Sesuaikan URL ini dengan view hapus Anda
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Anda tidak dapat mengembalikan ini!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send AJAX request to delete the satuan
+                    $.ajax({
+                        url: deleteUrl,
+                        type: 'POST',
+                        data: {
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'  // Include CSRF token
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire(
+                                    'Dihapus!',
+                                    'Satuan telah dihapus.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload(); // Reload the page to see changes
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Gagal!',
+                                    response.message,  // Tampilkan pesan kesalahan jika ada
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function () {
+                            Swal.fire(
+                                'Gagal!',
+                                'Terjadi kesalahan saat menghapus satuan.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}
+
+ 
