@@ -72,8 +72,17 @@ class Transaksi(models.Model):
     def __str__(self):
         return f"{self.pelanggan.nama} - {self.produk.nama} ({self.tanggal})"
 
+class KategoriSupplier(models.Model):
+    nama = models.CharField(max_length=100)
+    deskripsi = models.TextField(blank=True)
+    aktif = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.nama
+
 class Supplier(models.Model):
     nama = models.CharField(max_length=100)
+    kategori = models.ForeignKey(KategoriSupplier, on_delete=models.SET_NULL, null=True, blank=True)
     kontak = models.CharField(max_length=100)
     alamat = models.TextField()
     email = models.EmailField()
@@ -153,3 +162,46 @@ class Satuan(models.Model):
     deskripsi = models.TextField()
     aktif = models.BooleanField(default=True)
     dibuat_pada = models.DateTimeField(auto_now_add=True)
+
+class Pengiriman(models.Model):
+    penjualan = models.ForeignKey(Penjualan, on_delete=models.CASCADE)
+    tanggal_pengiriman = models.DateField()
+    kurir = models.CharField(max_length=100)
+    nomor_resi = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=50, choices=[
+        ('diproses', 'Diproses'),
+        ('dikirim', 'Dikirim'),
+        ('diterima', 'Diterima'),
+        ('dibatalkan', 'Dibatalkan')
+    ])
+
+    def __str__(self):
+        return f'Pengiriman {self.penjualan.id} - {self.status}'
+
+class Pembayaran(models.Model):
+    penjualan = models.ForeignKey(Penjualan, on_delete=models.CASCADE)
+    tanggal_pembayaran = models.DateField(auto_now_add=True)
+    jumlah_dibayar = models.DecimalField(max_digits=12, decimal_places=2)
+    metode = models.CharField(max_length=50, choices=[
+        ('transfer', 'Transfer Bank'),
+        ('cash', 'Cash'),
+        ('ewallet', 'E-Wallet'),
+    ])
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('lunas', 'Lunas'),
+        ('gagal', 'Gagal')
+    ])
+
+    def __str__(self):
+        return f'Pembayaran {self.penjualan.id} - {self.status}'
+
+class PenyesuaianStok(models.Model):
+    produk = models.ForeignKey(Produk, on_delete=models.CASCADE)
+    jumlah_perubahan = models.IntegerField(help_text="Isi positif untuk penambahan, negatif untuk pengurangan")
+    alasan = models.CharField(max_length=100)
+    tanggal = models.DateField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f'Penyesuaian {self.produk.nama} - {self.jumlah_perubahan}'

@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Kategori, Produk, Pelanggan, Penjualan, DetailPenjualan, Transaksi,
     Supplier, StokKeluar, StokMasuk, ReturPenjualan, User, Gudang, Diskon,
-    LogAktivitas, Pembelian, DetailPembelian, Satuan
+    LogAktivitas, Pembelian, DetailPembelian, Satuan, Pengiriman, Pembayaran, KategoriSupplier, PenyesuaianStok
 )
 
 @admin.register(Kategori)
@@ -90,3 +90,29 @@ class DetailPembelianAdmin(admin.ModelAdmin):
 class SatuanAdmin(admin.ModelAdmin):
     list_display = ['id', 'nama', 'kode', 'deskripsi', 'aktif', 'dibuat_pada']
     list_editable = ['nama', 'kode', 'deskripsi', 'aktif']
+
+@admin.register(Pengiriman)
+class PengirimanAdmin(admin.ModelAdmin):
+    list_display = ['id', 'penjualan', 'tanggal_pengiriman', 'kurir', 'nomor_resi', 'status']
+    list_editable = ['penjualan', 'tanggal_pengiriman', 'kurir', 'nomor_resi', 'status']
+    list_filter = ['status', 'kurir']
+    search_fields = ['nomor_resi']
+
+@admin.register(Pembayaran)
+class PembayaranAdmin(admin.ModelAdmin):
+    list_display = ['id', 'penjualan', 'tanggal_pembayaran', 'jumlah_dibayar', 'metode', 'status']
+    list_editable = ['penjualan', 'jumlah_dibayar', 'metode', 'status']
+    list_filter = ['metode', 'status']
+
+@admin.register(KategoriSupplier)
+class KategoriSupplierAdmin(admin.ModelAdmin):
+    list_display = ['id', 'nama', 'deskripsi', 'aktif']
+    list_editable = ['nama', 'deskripsi', 'aktif']
+    search_fields = ['nama']
+
+@admin.register(PenyesuaianStok)
+class PenyesuaianStokAdmin(admin.ModelAdmin):
+    list_display = ['id', 'produk', 'jumlah_perubahan', 'alasan', 'tanggal', 'user']
+    list_editable = ['produk', 'jumlah_perubahan', 'alasan', 'user']
+    list_filter = ['tanggal', 'user']
+    search_fields = ['alasan']
